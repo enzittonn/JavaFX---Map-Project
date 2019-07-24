@@ -1,5 +1,3 @@
-package sample;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -144,21 +142,29 @@ public class Main extends Application {
         loadMap.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-
-                File selectedFile = fileChooser.showOpenDialog(primaryStage);
-                if (selectedFile != null) {
-                    fileChooser.setTitle("Select picture to open");
-
-                    Image image = new Image(selectedFile.toURI().toString());
-                    imageView = new ImageView(image);
-                    //imageView.setFitHeight(705);
-                    //imageView.setFitWidth(800);
-                    imageView.setPreserveRatio(false);
-                    imageView.setPickOnBounds(true);
-                    imgContainer.getChildren().add(imageView);
-                    //changed = false;
-
+                if(imageView != null) {
+                    if (changed) {
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"You have unsaved data, do you want to load place?");
+                        alert.setHeaderText(null);
+                        alert.initOwner(primaryStage);
+                        Button exitButton = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
+                        Optional<ButtonType> loadResponse = alert.showAndWait();
+                        if (ButtonType.OK.equals(loadResponse.get())) {
+                            if(imgContainer != null) {
+                                if (placeMap.size() > 0) {
+                                    for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+                                        entry.getValue().hideTriangle();
+                                    }
+                                }
+                                markedPositions.clear();
+                                imageView.setImage(null);
+                                loadMap();
+                            }
+                        }
+                    }
+                    return;
                 }
+                loadMap();
             }
         });
 
@@ -465,6 +471,25 @@ public class Main extends Application {
         }
     }
 
+
+    private void loadMap() {
+        FileChooser fileChooser = new FileChooser();
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if (selectedFile != null) {
+            fileChooser.setTitle("Select picture to open");
+
+            Image image = new Image(selectedFile.toURI().toString());
+            imageView = new ImageView(image);
+            //imageView.setFitHeight(705);
+            //imageView.setFitWidth(800);
+            imageView.setPreserveRatio(false);
+            imageView.setPickOnBounds(true);
+            imgContainer.getChildren().add(imageView);
+        }
+    }
+
+
+
     private void loadPlace() {
         if(imgContainer != null) {
             if (placeMap.size() > 0) {
@@ -550,4 +575,3 @@ public class Main extends Application {
     }
 
 }
-
