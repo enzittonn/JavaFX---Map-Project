@@ -1,3 +1,5 @@
+package sample;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,10 +22,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Main extends Application {
     private MenuItem loadMap = new MenuItem("Load Map");
@@ -46,7 +45,7 @@ public class Main extends Application {
 
     public static boolean newPlace = false;
     private boolean changed = false;
-    public static ArrayList<Position> markedPositions = new ArrayList<>();
+    public static Set<Position> markedPositions = new HashSet<>();
     private Group group = new Group();
     private Pane imgContainer = new Pane();
 
@@ -433,19 +432,17 @@ public class Main extends Application {
         } else {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
-                    if (entry.getValue().getName().equalsIgnoreCase(name)) {
+                    if (entry.getValue().getName().equalsIgnoreCase(name)){
                         entry.getValue().markPlace();
-                        return;
                     }
                 }
+            } else {
                 Alert hello = new Alert(Alert.AlertType.ERROR, "Error! No such place.");
                 hello.setHeaderText(null);
                 hello.showAndWait();
             }
+
         }
-
-
-
     }
 
     private void saveProcess(String tmp) {

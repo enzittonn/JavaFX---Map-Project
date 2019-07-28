@@ -3,7 +3,8 @@ package sample;
 
 import java.util.Objects;
 
-public class Position {     //fungera som nycklar i hashtabeller.
+public class Position {
+    //fungera som nycklar i hashtabeller.
     private double x;
     private double y;
 
