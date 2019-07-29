@@ -43,10 +43,15 @@ public class Main extends Application {
     private ImageView imageView;
     private Map<Position, Place> placeMap = new HashMap<>();
 
+
+
     public static boolean newPlace = false;
     private boolean changed = false;
     //when you click
     public static Set<Position> markedPositions = new HashSet<>();
+
+    public static Set<Position> showPositions = new HashSet<>();
+
     private Group group = new Group();
     private Pane imgContainer = new Pane();
 
@@ -460,12 +465,12 @@ public class Main extends Application {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     if (entry.getValue().getName().equalsIgnoreCase(name)){
                         entry.getValue().markPlace();
-                         markedPositions.add(entry.getKey());
+                         showPositions.add(entry.getKey());
 
                     }
 
                 }
-                for (Position p :markedPositions) {
+                for (Position p :showPositions) {
                     Place z = placeMap.get(p);
                     z.showTriangle();
 
