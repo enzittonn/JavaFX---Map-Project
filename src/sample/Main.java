@@ -276,11 +276,22 @@ public class Main extends Application {
         hideCategory.setOnAction(e -> {
             String category = categoriesView.getSelectionModel().getSelectedItem();
             //System.out.println(category);
-            for(Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+
+            for(Map.Entry<Position,Place> ez : placeMap.entrySet()){
+                System.out.println(ez);
+
+
+            }
+
+
+            /*for(Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                 if(entry.getValue().getCategory().equalsIgnoreCase(category)) {
                     entry.getValue().hideTriangle();
+                    System.out.println(entry.getValue());
+                    return;
                 }
-            } categoriesView.getSelectionModel().clearSelection();
+            }*/
+            categoriesView.getSelectionModel().clearSelection();
 
         });
 
@@ -434,6 +445,7 @@ public class Main extends Application {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     if (entry.getValue().getName().equalsIgnoreCase(name)){
                         entry.getValue().markPlace();
+                         markedPositions.add(entry.getKey());
                     }
                 }
             } else {
@@ -531,6 +543,7 @@ public class Main extends Application {
             imgContainer.getChildren().add(triangle);
             if (place.length == 5) {
                 placeMap.put(position, new NamedPlace(place[4], position, place[1], triangle));
+
             } else if (place.length == 6) {
                 placeMap.put(position, new DescribedPlace(place[4], position, place[1], place[5], triangle));
             }

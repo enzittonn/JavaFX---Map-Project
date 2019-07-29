@@ -101,12 +101,14 @@ public abstract class Place {
         if (o == null || getClass() != o.getClass()) return false;
         Place place = (Place) o;
         return Objects.equals(name, place.name) &&
-                Objects.equals(position, place.position);
+                Objects.equals(position, place.position)&&
+                Objects.equals(triangle,place.triangle);
+
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, position);
+        return Objects.hash(name, position, triangle);
     }
 
     @Override
