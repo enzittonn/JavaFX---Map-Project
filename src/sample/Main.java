@@ -1,5 +1,3 @@
-package sample;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,14 +41,10 @@ public class Main extends Application {
     private ImageView imageView;
     private Map<Position, Place> placeMap = new HashMap<>();
 
-
-
     public static boolean newPlace = false;
     private boolean changed = false;
-    //when you click
-    public static Set<Position> markedPositions = new HashSet<>();
-
-    public static Set<Position> showPositions = new HashSet<>();
+    public static ArrayList<Position> markedPositions = new ArrayList<>();
+    public Set<Position> showPositions = new HashSet<>();
 
     private Group group = new Group();
     private Pane imgContainer = new Pane();
@@ -144,11 +138,33 @@ public class Main extends Application {
                 , new FileChooser.ExtensionFilter("place Files", "*.places")
         );
 
+        loadPlaces.setOnAction(e -> {
+            if(imageView != null) {
+                if (changed) {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"You have unsaved data, do you want to load place?");
+                    alert.setHeaderText(null);
+                    alert.initOwner(primaryStage);
+                    Button exitButton = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
+                    Optional<ButtonType> loadResponse = alert.showAndWait();
+                    if (ButtonType.OK.equals(loadResponse.get())) {
+                        loadPlace();
+                        return;
+                    }
+                }
+                loadPlace();
+            } else {
+                Alert msg = new Alert(Alert.AlertType.ERROR, "Error! Load map first.");
+                msg.setHeaderText(null);
+                msg.showAndWait();
+            }
+
+        });
+
         loadMap.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 if(imageView != null) {
-                    if (changed ) {
+                    if (changed) {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"You have unsaved data, do you want to load place?");
                         alert.setHeaderText(null);
                         alert.initOwner(primaryStage);
@@ -164,9 +180,19 @@ public class Main extends Application {
                                 markedPositions.clear();
                                 imageView.setImage(null);
                                 loadMap();
+                                return;
                             }
                         }
+                        return;
                     }
+                    if (placeMap.size() > 0) {
+                        for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+                            entry.getValue().hideTriangle();
+                        }
+                    }
+                    markedPositions.clear();
+                    imageView.setImage(null);
+                    loadMap();
                     return;
                 }
                 loadMap();
@@ -201,10 +227,8 @@ public class Main extends Application {
                             Alert msg = new Alert(Alert.AlertType.INFORMATION, thePlace.getName() + "[" + thePlace.getPosition().getX() + "," + thePlace.getPosition().getY() + "]");
                             msg.showAndWait();
                             msg.setHeaderText(null);
-
                         }
                     }
-
                 } catch (NumberFormatException e) {
                     exceptionThrower();
                 }
@@ -269,7 +293,7 @@ public class Main extends Application {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     entry.getValue().isMarked();
-
+                    //markedPositions.add(entry.getKey());
                 }
             }
         });
@@ -281,35 +305,25 @@ public class Main extends Application {
 
 
         hideCategory.setOnAction(e -> {
-
-
-
             String category = categoriesView.getSelectionModel().getSelectedItem();
-
-            for (Map.Entry<Position, Place> entry : placeMap.entrySet()){
-                if(entry.getValue().getCategory().equals(category)){
-                    entry.getValue().markPlace();
-                    markedPositions.add(entry.getKey());
-
+            if(imgContainer == null) {
+                Alert hello = new Alert(Alert.AlertType.ERROR, "Error! Load map first.");
+                hello.setHeaderText(null);
+                hello.showAndWait();
+            } else {
+                if (placeMap.size() > 0) {
+                    for(Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+                        if(entry.getValue().getCategory().equalsIgnoreCase(category)) {
+                            entry.getValue().hideTriangle();
+                        }
+                    }
+                } else {
+                    Alert hello = new Alert(Alert.AlertType.ERROR, "Error! No place pinned yet.");
+                    hello.setHeaderText(null);
+                    hello.showAndWait();
                 }
             }
-            for (Position p : markedPositions) {
-                Place c = placeMap.get(p);
-
-                c.hideTriangle();
-
-            }
-
-
-
-
-            /*for(Map.Entry<Position, Place> entry : placeMap.entrySet()) {
-                if(entry.getValue().getCategory().equalsIgnoreCase(category)) {
-                    entry.getValue().hideTriangle();
-                    System.out.println(entry.getValue());
-                    return;
-                }
-            }*/
+            //System.out.println(category);
             categoriesView.getSelectionModel().clearSelection();
 
         });
@@ -329,27 +343,7 @@ public class Main extends Application {
         });
 
 
-        loadPlaces.setOnAction(e -> {
-            if(imageView != null) {
-                if (changed) {
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"You have unsaved data, do you want to load place?");
-                    alert.setHeaderText(null);
-                    alert.initOwner(primaryStage);
-                    Button exitButton = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
-                    Optional<ButtonType> loadResponse = alert.showAndWait();
-                    if (ButtonType.OK.equals(loadResponse.get())) {
-                        loadPlace();
-                    }
-                } else{
-                    loadPlace();
-                }
-            } else {
-                Alert msg = new Alert(Alert.AlertType.ERROR, "Error! Load map first.");
-                msg.setHeaderText(null);
-                msg.showAndWait();
-            }
 
-        });
 
 
         exitButton.setOnAction(event -> {
@@ -413,9 +407,15 @@ public class Main extends Application {
 
     private void removePlace() {
         for (Position p : markedPositions) {
-            Place pl = placeMap.get(p);
-            pl.hideTriangle();
-            placeMap.remove(p, pl);
+            for (Position t : showPositions) {
+                Place pl = placeMap.get(p);
+                pl.hideTriangle();
+                placeMap.remove(p, pl);
+
+                Place pt = placeMap.get(t);
+                pt.hideTriangle();
+                placeMap.remove(t, pt);
+            }
         }
         markedPositions.clear();
         if (placeMap.size() == 0) {
@@ -463,25 +463,25 @@ public class Main extends Application {
         } else {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
-                    if (entry.getValue().getName().equalsIgnoreCase(name)){
+                    if (entry.getValue().getName().equalsIgnoreCase(name)) {
                         entry.getValue().markPlace();
-                         showPositions.add(entry.getKey());
-
+                        showPositions.add(entry.getKey());
+                        //markedPositions.add(entry.getKey());
                     }
-
                 }
                 for (Position p :showPositions) {
                     Place z = placeMap.get(p);
                     z.showTriangle();
-
                 }
             } else {
                 Alert hello = new Alert(Alert.AlertType.ERROR, "Error! No such place.");
                 hello.setHeaderText(null);
                 hello.showAndWait();
             }
-
         }
+
+
+
     }
 
     private void saveProcess(String tmp) {
@@ -570,7 +570,6 @@ public class Main extends Application {
             imgContainer.getChildren().add(triangle);
             if (place.length == 5) {
                 placeMap.put(position, new NamedPlace(place[4], position, place[1], triangle));
-
             } else if (place.length == 6) {
                 placeMap.put(position, new DescribedPlace(place[5], position, place[4], place[1], triangle));
             }
