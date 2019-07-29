@@ -143,7 +143,7 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 if(imageView != null) {
-                    if (changed) {
+                    if (changed ) {
                         Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"You have unsaved data, do you want to load place?");
                         alert.setHeaderText(null);
                         alert.initOwner(primaryStage);
@@ -264,6 +264,7 @@ public class Main extends Application {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     entry.getValue().isMarked();
+
                 }
             }
         });
@@ -334,8 +335,9 @@ public class Main extends Application {
                     if (ButtonType.OK.equals(loadResponse.get())) {
                         loadPlace();
                     }
-                } else
+                } else{
                     loadPlace();
+                }
             } else {
                 Alert msg = new Alert(Alert.AlertType.ERROR, "Error! Load map first.");
                 msg.setHeaderText(null);
@@ -459,7 +461,14 @@ public class Main extends Application {
                     if (entry.getValue().getName().equalsIgnoreCase(name)){
                         entry.getValue().markPlace();
                          markedPositions.add(entry.getKey());
+
                     }
+
+                }
+                for (Position p :markedPositions) {
+                    Place z = placeMap.get(p);
+                    z.showTriangle();
+                    z.unMark();
                 }
             } else {
                 Alert hello = new Alert(Alert.AlertType.ERROR, "Error! No such place.");
