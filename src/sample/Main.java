@@ -44,7 +44,7 @@ public class Main extends Application {
     public static boolean newPlace = false;
     private boolean changed = false;
     public static ArrayList<Position> markedPositions = new ArrayList<>();
-    public Set<Position> showPositions = new HashSet<>();
+    public Set<Position> hiddenPositions = new HashSet<>();
 
     private Group group = new Group();
     private Pane imgContainer = new Pane();
@@ -407,15 +407,14 @@ public class Main extends Application {
 
     private void removePlace() {
         for (Position p : markedPositions) {
-            for (Position t : showPositions) {
-                Place pl = placeMap.get(p);
-                pl.hideTriangle();
-                placeMap.remove(p, pl);
-
+            for (Position t : hiddenPositions) {
                 Place pt = placeMap.get(t);
                 pt.hideTriangle();
-                placeMap.remove(t, pt);
+                hiddenPositions.remove(pt);
             }
+            Place pl = placeMap.get(p);
+            pl.hideTriangle();
+            placeMap.remove(p, pl);
         }
         markedPositions.clear();
         if (placeMap.size() == 0) {
@@ -465,11 +464,11 @@ public class Main extends Application {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     if (entry.getValue().getName().equalsIgnoreCase(name)) {
                         entry.getValue().markPlace();
-                        showPositions.add(entry.getKey());
-                        //markedPositions.add(entry.getKey());
+                        hiddenPositions.add(entry.getKey());
+                        markedPositions.add(entry.getKey());
                     }
                 }
-                for (Position p :showPositions) {
+                for (Position p : hiddenPositions) {
                     Place z = placeMap.get(p);
                     z.showTriangle();
                 }
