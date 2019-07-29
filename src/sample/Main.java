@@ -45,6 +45,7 @@ public class Main extends Application {
 
     public static boolean newPlace = false;
     private boolean changed = false;
+    //when you click
     public static Set<Position> markedPositions = new HashSet<>();
     private Group group = new Group();
     private Pane imgContainer = new Pane();
@@ -274,14 +275,26 @@ public class Main extends Application {
 
 
         hideCategory.setOnAction(e -> {
+
+
+
             String category = categoriesView.getSelectionModel().getSelectedItem();
-            //System.out.println(category);
 
-            for(Map.Entry<Position,Place> ez : placeMap.entrySet()){
-                System.out.println(ez);
+            for (Map.Entry<Position, Place> entry : placeMap.entrySet()){
+                if(entry.getValue().getCategory().equals(category)){
+                    entry.getValue().markPlace();
+                    markedPositions.add(entry.getKey());
 
+                }
+            }
+            for (Position p : markedPositions) {
+                Place c = placeMap.get(p);
+
+                c.hideTriangle();
 
             }
+
+
 
 
             /*for(Map.Entry<Position, Place> entry : placeMap.entrySet()) {
@@ -545,7 +558,7 @@ public class Main extends Application {
                 placeMap.put(position, new NamedPlace(place[4], position, place[1], triangle));
 
             } else if (place.length == 6) {
-                placeMap.put(position, new DescribedPlace(place[4], position, place[1], place[5], triangle));
+                placeMap.put(position, new DescribedPlace(place[5], position, place[4], place[1], triangle));
             }
         }
     }
