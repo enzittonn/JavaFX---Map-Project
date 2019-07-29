@@ -468,7 +468,7 @@ public class Main extends Application {
                 for (Position p :markedPositions) {
                     Place z = placeMap.get(p);
                     z.showTriangle();
-                    z.unMark();
+
                 }
             } else {
                 Alert hello = new Alert(Alert.AlertType.ERROR, "Error! No such place.");
