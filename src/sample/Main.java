@@ -26,7 +26,6 @@ public class Main extends Application {
     private MenuItem loadMap = new MenuItem("Load Map");
     private MenuItem loadPlaces = new MenuItem("Load Places");
     private MenuItem saveButton = new MenuItem("Save");
-
     private MenuItem exitButton = new MenuItem("Exit");
     private Button newButton = new Button("New");
     private Button searchButton = new Button("Search");
@@ -150,8 +149,10 @@ public class Main extends Application {
                         loadPlace();
                         return;
                     }
+                } else {
+                    loadPlace();
+                    return;
                 }
-                loadPlace();
             } else {
                 Alert msg = new Alert(Alert.AlertType.ERROR, "Error! Load map first.");
                 msg.setHeaderText(null);
@@ -177,23 +178,25 @@ public class Main extends Application {
                                         entry.getValue().hideTriangle();
                                     }
                                 }
-                                markedPositions.clear();
-                                imageView.setImage(null);
-                                loadMap();
-                                return;
                             }
+                            markedPositions.clear();
+                            imageView.setImage(null);
+                            loadMap();
+                            return;
                         }
                         return;
-                    }
-                    if (placeMap.size() > 0) {
-                        for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
-                            entry.getValue().hideTriangle();
+                    } else {
+                        if (placeMap.size() > 0) {
+                            for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+                                entry.getValue().hideTriangle();
+                            }
+                            placeMap.clear();
                         }
+                        markedPositions.clear();
+                        imageView.setImage(null);
+                        loadMap();
+                        return;
                     }
-                    markedPositions.clear();
-                    imageView.setImage(null);
-                    loadMap();
-                    return;
                 }
                 loadMap();
             }
@@ -271,7 +274,7 @@ public class Main extends Application {
                                 createDescPlace(placeName, placeDesc, pos1, category, triangle);
                             } else if (result.get() == ButtonType.CANCEL) {
                                 imageView.setCursor(Cursor.DEFAULT);
-                                namedButton.setSelected(false);
+                                describedButton.setSelected(false);
                                 categoriesView.getSelectionModel().clearSelection();
                                 return;
                             }
@@ -293,7 +296,8 @@ public class Main extends Application {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     entry.getValue().isMarked();
-                    //markedPositions.add(entry.getKey());
+                    markedPositions.remove(entry.getValue());
+                    hiddenPositions.add(entry.getKey());
                 }
             }
         });
@@ -357,10 +361,9 @@ public class Main extends Application {
         searchBox.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
+                unmarkPlaces();
                 if (event.getCode() == KeyCode.ENTER) {
-                    unmarkPlaces();
-                    String search = searchBox.getText();
-                    searchPlace(search);
+                    searchPlace(searchBox.getText());
                 }
             }
         });
@@ -368,8 +371,7 @@ public class Main extends Application {
 
         searchButton.setOnAction(event -> {
             unmarkPlaces();
-            String searchInput = searchBox.getText();
-            searchPlace(searchInput);
+            searchPlace(searchBox.getText());
 
         });
 
@@ -398,7 +400,7 @@ public class Main extends Application {
         DescribedPlace firstDescPlace = new DescribedPlace(name, position, description, category, triangle);
         addToHashMap(position, firstDescPlace);
         imgContainer.getChildren().add(triangle);
-        namedButton.setSelected(false);
+        describedButton.setSelected(false);
     }
 
     private void addToHashMap(Position p, Place pl) {
@@ -407,19 +409,26 @@ public class Main extends Application {
 
     private void removePlace() {
         for (Position p : markedPositions) {
-            for (Position t : hiddenPositions) {
-                Place pt = placeMap.get(t);
-                pt.hideTriangle();
-                hiddenPositions.remove(pt);
-            }
-            Place pl = placeMap.get(p);
-            pl.hideTriangle();
-            placeMap.remove(p, pl);
+            Place pt = placeMap.get(p);
+            pt.hideTriangle();
+            placeMap.remove(pt);
+            markedPositions.remove(pt);
         }
         markedPositions.clear();
-        if (placeMap.size() == 0) {
+        changed = true;
+
+
+        if (placeMap.isEmpty()) {
             changed = false;
-        }
+        } /*else {
+            for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+                if (entry.getValue().isMarked()) {
+                    markedPositions.remove(entry.getValue());
+                    placeMap.remove(entry.getValue());
+                }
+            }
+
+        }*/
     }
 
     private void exceptionThrower() {
@@ -463,24 +472,22 @@ public class Main extends Application {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     if (entry.getValue().getName().equalsIgnoreCase(name)) {
+                        entry.getValue().showTriangle();
                         entry.getValue().markPlace();
-                        hiddenPositions.add(entry.getKey());
                         markedPositions.add(entry.getKey());
+                        hiddenPositions.remove(entry.getKey());
                     }
                 }
-                for (Position p : hiddenPositions) {
+                /*for (Position p : hiddenPositions) {
                     Place z = placeMap.get(p);
                     z.showTriangle();
-                }
+                }*/
             } else {
                 Alert hello = new Alert(Alert.AlertType.ERROR, "Error! No such place.");
                 hello.setHeaderText(null);
                 hello.showAndWait();
             }
         }
-
-
-
     }
 
     private void saveProcess(String tmp) {
