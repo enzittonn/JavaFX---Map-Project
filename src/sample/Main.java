@@ -1,3 +1,5 @@
+package sample;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -42,7 +44,7 @@ public class Main extends Application {
 
     public static boolean newPlace = false;
     private boolean changed = false;
-    public static ArrayList<Position> markedPositions = new ArrayList<>();
+    public static Set<Position> markedPositions = new HashSet<>();
     public Set<Position> hiddenPositions = new HashSet<>();
 
     private Group group = new Group();
@@ -295,11 +297,15 @@ public class Main extends Application {
         hideButton.setOnAction(e -> {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
-                    entry.getValue().isMarked();
-                    markedPositions.remove(entry.getValue());
+                    if (entry.getValue().isMarked()) {
+                        markedPositions.remove(entry);
+                    }
+
                     hiddenPositions.add(entry.getKey());
                 }
             }
+
+            markedPositions.clear();
         });
 
 
@@ -411,7 +417,7 @@ public class Main extends Application {
         for (Position p : markedPositions) {
             Place pt = placeMap.get(p);
             pt.hideTriangle();
-            placeMap.remove(pt);
+            placeMap.remove(p);
             markedPositions.remove(pt);
         }
         markedPositions.clear();
@@ -475,7 +481,7 @@ public class Main extends Application {
                         entry.getValue().showTriangle();
                         entry.getValue().markPlace();
                         markedPositions.add(entry.getKey());
-                        hiddenPositions.remove(entry.getKey());
+                        //hiddenPositions.remove(entry.getKey());
                     }
                 }
                 /*for (Position p : hiddenPositions) {
