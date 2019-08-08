@@ -1,5 +1,3 @@
-package sample;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -44,7 +42,7 @@ public class Main extends Application {
 
     public static boolean newPlace = false;
     private boolean changed = false;
-    public static Set<Position> markedPositions = new HashSet<>();
+    public static ArrayList<Position> markedPositions = new ArrayList<>();
     public Set<Position> hiddenPositions = new HashSet<>();
 
     private Group group = new Group();
@@ -297,14 +295,11 @@ public class Main extends Application {
         hideButton.setOnAction(e -> {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
-                    if (entry.getValue().isMarked()) {
-                        markedPositions.remove(entry);
-                    }
-
+                    entry.getValue().isMarked();
+                    markedPositions.remove(entry.getValue());
                     hiddenPositions.add(entry.getKey());
                 }
             }
-
             markedPositions.clear();
            // hiddenPositions.clear();
         });
