@@ -306,6 +306,7 @@ public class Main extends Application {
             }
 
             markedPositions.clear();
+           // hiddenPositions.clear();
         });
 
 
@@ -368,6 +369,7 @@ public class Main extends Application {
             @Override
             public void handle(KeyEvent event) {
                 unmarkPlaces();
+                markedPositions.clear();
                 if (event.getCode() == KeyCode.ENTER) {
                     searchPlace(searchBox.getText());
                 }
@@ -376,6 +378,8 @@ public class Main extends Application {
 
 
         searchButton.setOnAction(event -> {
+            markedPositions.clear();
+            hiddenPositions.clear();
             unmarkPlaces();
             searchPlace(searchBox.getText());
 
@@ -481,7 +485,7 @@ public class Main extends Application {
                         entry.getValue().showTriangle();
                         entry.getValue().markPlace();
                         markedPositions.add(entry.getKey());
-                        //hiddenPositions.remove(entry.getKey());
+                        hiddenPositions.remove(entry.getKey());
                     }
                 }
                 /*for (Position p : hiddenPositions) {
