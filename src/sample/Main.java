@@ -1,3 +1,5 @@
+package sample;
+
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -20,6 +22,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main extends Application {
@@ -38,15 +41,32 @@ public class Main extends Application {
     private Button hideCategory = new Button("Hide Category");
     private ListView<String> categoriesView;
     private ImageView imageView;
+
     private Map<Position, Place> placeMap = new HashMap<>();
 
+    //public för att den anropas i Place klassen
     public static boolean newPlace = false;
+
     private boolean changed = false;
+
+    //public för att den anropas i Place klassen
     public static ArrayList<Position> markedPositions = new ArrayList<>();
-    public Set<Position> hiddenPositions = new HashSet<>();
+
+    private Set<Position> hiddenPositions = new HashSet<>();
 
     private Group group = new Group();
     private Pane imgContainer = new Pane();
+
+    // name as a ky in hasmap och List<place> som value search place
+    //searching for categories
+    Map<String, ArrayList<Place>> categoryMap = new HashMap<>();
+
+
+    //search for search BUTTON
+    Map<String, ArrayList<Place>> searchForNameMap = new HashMap<>();
+
+
+    // catory hasmap
 
 
     private EventHandler<WindowEvent> unsavedExit = event -> {
@@ -60,7 +80,7 @@ public class Main extends Application {
 
             Optional<ButtonType> closeResponse = closeConfirmation.showAndWait();
 
-            if(closeResponse.get() != ButtonType.OK) {
+            if (closeResponse.get() != ButtonType.OK) {
                 event.consume();
             }
         }
@@ -71,7 +91,6 @@ public class Main extends Application {
         BorderPane root = new BorderPane();
         root.setPrefHeight(2000);
         root.setPrefWidth(1170);
-
 
 
         HBox menuBarBox = new HBox();
@@ -130,7 +149,6 @@ public class Main extends Application {
         root.setCenter(group);
 
 
-
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("PNG Files", "*.png")
@@ -138,9 +156,9 @@ public class Main extends Application {
         );
 
         loadPlaces.setOnAction(e -> {
-            if(imageView != null) {
+            if (imageView != null) {
                 if (changed) {
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"You have unsaved data, do you want to load place?");
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You have unsaved data, do you want to load place?");
                     alert.setHeaderText(null);
                     alert.initOwner(primaryStage);
                     Button exitButton = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
@@ -164,15 +182,15 @@ public class Main extends Application {
         loadMap.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if(imageView != null) {
+                if (imageView != null) {
                     if (changed) {
-                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION,"You have unsaved data, do you want to load place?");
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "You have unsaved data, do you want to load place?");
                         alert.setHeaderText(null);
                         alert.initOwner(primaryStage);
                         Button exitButton = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
                         Optional<ButtonType> loadResponse = alert.showAndWait();
                         if (ButtonType.OK.equals(loadResponse.get())) {
-                            if(imgContainer != null) {
+                            if (imgContainer != null) {
                                 if (placeMap.size() > 0) {
                                     for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                                         entry.getValue().hideTriangle();
@@ -293,15 +311,31 @@ public class Main extends Application {
 
 
         hideButton.setOnAction(e -> {
-            if (placeMap.size() > 0) {
-                for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+            
+            String search = searchBox.getText().toString();
+            
+            
+            //Map<String, List<Place>> searchForNameMap = new HashMap<>();
+            if (searchForNameMap.size() > 0) {
+                
+                
+                ArrayList<Place> x = searchForNameMap.get(search);
+
+                x.forEach(y->{
+                    y.hideTriangle();
+                });
+                
+                
+                
+                
+                /*for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     entry.getValue().isMarked();
                     markedPositions.remove(entry.getValue());
                     hiddenPositions.add(entry.getKey());
-                }
+                }*/
             }
             markedPositions.clear();
-           // hiddenPositions.clear();
+            // hiddenPositions.clear();
         });
 
 
@@ -312,17 +346,20 @@ public class Main extends Application {
 
         hideCategory.setOnAction(e -> {
             String category = categoriesView.getSelectionModel().getSelectedItem();
-            if(imgContainer == null) {
+            if (imgContainer == null) {
                 Alert hello = new Alert(Alert.AlertType.ERROR, "Error! Load map first.");
                 hello.setHeaderText(null);
                 hello.showAndWait();
             } else {
-                if (placeMap.size() > 0) {
-                    for(Map.Entry<Position, Place> entry : placeMap.entrySet()) {
-                        if(entry.getValue().getCategory().equalsIgnoreCase(category)) {
-                            entry.getValue().hideTriangle();
-                        }
+                if (categoryMap.size() > 0) {
+
+
+                    ArrayList<Place> x = categoryMap.get(category);
+
+                    for (Place p : x) {
+                        p.hideTriangle();
                     }
+
                 } else {
                     Alert hello = new Alert(Alert.AlertType.ERROR, "Error! No place pinned yet.");
                     hello.setHeaderText(null);
@@ -347,9 +384,6 @@ public class Main extends Application {
                 //categoriesView.getSelectionModel().clearSelection();
             }
         });
-
-
-
 
 
         exitButton.setOnAction(event -> {
@@ -388,13 +422,13 @@ public class Main extends Application {
 
     private String setCategory() {
         String category = categoriesView.getSelectionModel().getSelectedItem();
-        if(category == null) {
+        if (category == null) {
             category = "None";
         }
         return category;
     }
 
-    private void createNamedPlace(String name, Position position, String category, Triangle triangle){
+    private void createNamedPlace(String name, Position position, String category, Triangle triangle) {
         NamedPlace firstNamedPlace = new NamedPlace(name, position, category, triangle);
         addToHashMap(position, firstNamedPlace);
         imgContainer.getChildren().add(triangle);
@@ -410,15 +444,35 @@ public class Main extends Application {
 
     private void addToHashMap(Position p, Place pl) {
         placeMap.put(p, pl);
+        String name = pl.getName();
+        String category = pl.getCategory();
+
+        if (!categoryMap.containsKey(category)) {
+            categoryMap.put(category, new ArrayList<>());
+        }
+        categoryMap.get(category).add(pl);
+
+        if (!searchForNameMap.containsKey(name)) {
+            searchForNameMap.put(name, new ArrayList<>());
+        }
+        searchForNameMap.get(name).add(pl);
     }
 
     private void removePlace() {
+
+
         for (Position p : markedPositions) {
             Place pt = placeMap.get(p);
             pt.hideTriangle();
             placeMap.remove(p);
-            markedPositions.remove(pt);
+
+            String category = pt.getCategory();
+
+            categoryMap.get(category).remove(pt);
+
         }
+
+
         markedPositions.clear();
         changed = true;
 
@@ -451,11 +505,26 @@ public class Main extends Application {
     }
 
     private void showCategory(String category) {
-        for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+
+
+
+        ArrayList<Place> x = categoryMap.get(category);
+
+        for (Place p : x) {
+            p.showTriangle();
+        }
+
+
+        /**
+         * List</Places>  x =  categoryMap.get(category)
+         * for(
+         * */
+
+       /* for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
             if (entry.getValue().getCategory().equalsIgnoreCase(category)) {
                 entry.getValue().showTriangle();
             }
-        }
+        }*/
         //categoriesView.getSelectionModel().clearSelection();
     }
 
@@ -469,7 +538,7 @@ public class Main extends Application {
     }
 
     private void searchPlace(String name) {
-        if(imgContainer == null) {
+        if (imgContainer == null) {
             Alert hello = new Alert(Alert.AlertType.ERROR, "Error! Load map first.");
             hello.setHeaderText(null);
             hello.showAndWait();
@@ -536,9 +605,8 @@ public class Main extends Application {
     }
 
 
-
     private void loadPlace() {
-        if(imgContainer != null) {
+        if (imgContainer != null) {
             if (placeMap.size() > 0) {
                 for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     entry.getValue().hideTriangle();
@@ -571,21 +639,34 @@ public class Main extends Application {
 
     }
 
+
     private void instreamHandler(ArrayList<String> myLoadedList) {
         for (String tmp : myLoadedList) {
             String[] place = tmp.split(",");
             double posX = Double.parseDouble(place[2]);
             double posY = Double.parseDouble(place[3]);
+            String category = place[1];
+            String name = place[4];
+
+            String description = place[5];
             Position position = new Position(posX, posY);
             Triangle triangle = createTriangle(place[1], posX, posY);
             imgContainer.getChildren().add(triangle);
-            if (place.length == 5) {
-                placeMap.put(position, new NamedPlace(place[4], position, place[1], triangle));
-            } else if (place.length == 6) {
-                placeMap.put(position, new DescribedPlace(place[5], position, place[4], place[1], triangle));
+            Place place1 = null;
+            if (place.length == 6) {
+                place1 = new DescribedPlace(name, position, description, category, triangle);
+
+            } else if (place.length == 5) {
+                place1 = new NamedPlace(name, position, category, triangle);
             }
+            addToHashMap(position, place1);
+
+
         }
     }
+
+
+
 
     private String conversion() {
         String placesString = "";
