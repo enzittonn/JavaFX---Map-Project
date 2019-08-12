@@ -311,8 +311,8 @@ public class Main extends Application {
 
 
         hideButton.setOnAction(e -> {
-            
-            String search = searchBox.getText().toString();
+
+            String search = searchBox.getText();
             
             
             //Map<String, List<Place>> searchForNameMap = new HashMap<>();
@@ -456,6 +456,11 @@ public class Main extends Application {
             searchForNameMap.put(name, new ArrayList<>());
         }
         searchForNameMap.get(name).add(pl);
+
+
+        for (Map.Entry<String, ArrayList<Place>> x : categoryMap.entrySet()) {
+            System.out.println(x);
+        }
     }
 
     private void removePlace() {
@@ -474,20 +479,9 @@ public class Main extends Application {
 
 
         markedPositions.clear();
-        changed = true;
 
 
-        if (placeMap.isEmpty()) {
-            changed = false;
-        } /*else {
-            for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
-                if (entry.getValue().isMarked()) {
-                    markedPositions.remove(entry.getValue());
-                    placeMap.remove(entry.getValue());
-                }
-            }
-
-        }*/
+        changed = !placeMap.isEmpty();
     }
 
     private void exceptionThrower() {
@@ -543,15 +537,27 @@ public class Main extends Application {
             hello.setHeaderText(null);
             hello.showAndWait();
         } else {
-            if (placeMap.size() > 0) {
-                for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
+            if (searchForNameMap.size() > 0) {
+
+                ArrayList<Place> jj = searchForNameMap.get(name);
+
+                for (Place h : jj) {
+                    h.showTriangle();
+                    h.markPlace();
+                    markedPositions.add(h.getPosition());
+                    hiddenPositions.remove(h.getPosition());
+                }
+
+
+
+                /*for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
                     if (entry.getValue().getName().equalsIgnoreCase(name)) {
                         entry.getValue().showTriangle();
                         entry.getValue().markPlace();
                         markedPositions.add(entry.getKey());
                         hiddenPositions.remove(entry.getKey());
                     }
-                }
+                }*/
                 /*for (Position p : hiddenPositions) {
                     Place z = placeMap.get(p);
                     z.showTriangle();
@@ -648,12 +654,13 @@ public class Main extends Application {
             String category = place[1];
             String name = place[4];
 
-            String description = place[5];
+
             Position position = new Position(posX, posY);
             Triangle triangle = createTriangle(place[1], posX, posY);
             imgContainer.getChildren().add(triangle);
             Place place1 = null;
-            if (place.length == 6) {
+            if (place.length >= 6) {
+                String description = place[5];
                 place1 = new DescribedPlace(name, position, description, category, triangle);
 
             } else if (place.length == 5) {
