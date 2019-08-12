@@ -24,6 +24,7 @@ import javafx.stage.WindowEvent;
 import java.io.*;
 import java.util.*;
 
+//Mosleh is a lEGEND
 public class Main extends Application {
     private MenuItem loadMap = new MenuItem("Load Map");
     private MenuItem loadPlaces = new MenuItem("Load Places");
