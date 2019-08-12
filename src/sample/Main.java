@@ -1,5 +1,3 @@
-package sample;
-
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -24,7 +22,6 @@ import javafx.stage.WindowEvent;
 import java.io.*;
 import java.util.*;
 
-//Mosleh is a lEGEND
 public class Main extends Application {
     private MenuItem loadMap = new MenuItem("Load Map");
     private MenuItem loadPlaces = new MenuItem("Load Places");
@@ -181,7 +178,7 @@ public class Main extends Application {
                         if (ButtonType.OK.equals(loadResponse.get())) {
                             if (imgContainer != null) {
                                 if (placeMap.size() > 0) {
-                                    hideTriangle();
+                                    removeTriangle();
                                 }
                             }
                             markedPositions.clear();
@@ -192,8 +189,7 @@ public class Main extends Application {
                         return;
                     } else {
                         if (placeMap.size() > 0) {
-                            hideTriangle();
-                            placeMap.clear();
+                            removeTriangle();
                         }
                         markedPositions.clear();
                         imageView.setImage(null);
@@ -342,7 +338,6 @@ public class Main extends Application {
             @Override
             public void handle(MouseEvent event) {
                 showCategory(categoriesView.getSelectionModel().getSelectedItem());
-                //categoriesView.getSelectionModel().clearSelection();
             }
         });
 
@@ -421,16 +416,19 @@ public class Main extends Application {
 
     private void removePlace() {
         for (Position p : markedPositions) {
+
             Place pt = placeMap.get(p);
             pt.hideTriangle();
             placeMap.remove(p);
+
+            searchForNameMap.remove(pt.getName());
 
             String category = pt.getCategory();
 
             categoryMap.get(category).remove(pt);
         }
         markedPositions.clear();
-        changed = !placeMap.isEmpty();
+        changed = true;
     }
 
     private void exceptionThrower() {
@@ -515,8 +513,6 @@ public class Main extends Application {
             fileChooser.setTitle("Select picture to open");
             Image image = new Image(selectedFile.toURI().toString());
             imageView = new ImageView(image);
-            //imageView.setFitHeight(705);
-            //imageView.setFitWidth(800);
             imageView.setPreserveRatio(false);
             imageView.setPickOnBounds(true);
             imgContainer.getChildren().add(imageView);
@@ -527,7 +523,7 @@ public class Main extends Application {
     private void loadPlace() {
         if (imgContainer != null) {
             if (placeMap.size() > 0) {
-                hideTriangle();
+                removeTriangle();
             }
             markedPositions.clear();
             FileChooser fileChooser = new FileChooser();
@@ -551,9 +547,7 @@ public class Main extends Application {
 
         } else {
             //changed = false;
-
         }
-
     }
 
 
@@ -620,12 +614,15 @@ public class Main extends Application {
         return loadResponse;
     }
 
-    private void hideTriangle() {
+    private void removeTriangle() {
         for (Map.Entry<Position, Place> entry : placeMap.entrySet()) {
             entry.getValue().hideTriangle();
         }
-    }
+        placeMap.clear();
+        categoryMap.clear();
+        searchForNameMap.clear();
 
+    }
 
     public static void main(String[] args) {
         launch(args);
