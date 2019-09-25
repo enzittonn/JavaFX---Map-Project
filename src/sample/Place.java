@@ -15,7 +15,7 @@ public abstract class Place {
     private String category;
     private boolean marked = false;
 
-
+    //this is a comment
     public Place(String name, Position position, String category, Triangle triangle){
         this.name = name;
         this.position = position;
