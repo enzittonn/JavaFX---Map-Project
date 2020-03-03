@@ -6,3 +6,6 @@ This project was to create a program in Java that marks places by categories on 
 
 Place type: Named, Described
 Place category: Underground(BLUE), Train(GREEN), Bus(RED), uncategorized(BLACK).
+
+
+![alt text](https://raw.githubusercontent.com/enzittonn/JavaFX---Map-Project/master/Program%20Screenshot.png)
